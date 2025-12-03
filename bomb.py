@@ -9,10 +9,6 @@ from bomb_configs import *
 # import the phases
 from bomb_phases import *
 
-# tkinter helpers for modal dialogs
-import tkinter.simpledialog as simpledialog
-import tkinter.messagebox as messagebox
-
 ###########
 # functions
 ###########
@@ -24,49 +20,9 @@ def bootup(n=0):
     # setup the phase threads, execute them, and check their statuses
     if (RPi):
         setup_phases()
-        # If running on the Pi, you can enable the question flow here as well:
-        present_math_questions()
-        # continue normal phase checking loop
         check_phases()
-    else:
-        # For local development (RPi == False) run the math questions so you can test dialogs
-        present_math_questions()
-        # If you want the rest of the phase-check loop for dev, you can call check_phases() here as well
     # if we're animating
    
-
-# presents simple math questions one-by-one using modal dialogs
-# first question: 2+2 -> if correct go to question 2
-def present_math_questions():
-    global strikes_left
-    # List of (prompt, expected_answer) tuples.
-    questions = [
-        ("What is 2 + 2?", "4"),
-        ("Question 2: What is 3 + 4?", "7"),
-    ]
-
-    for idx, (prompt, expected) in enumerate(questions):
-        # keep asking until correct or out of strikes
-        while True:
-            answer = simpledialog.askstring(f"Math Question {idx+1}", prompt, parent=window)
-            if answer is None:
-                # treat cancel as incorrect attempt
-                strikes_left -= 1
-                messagebox.showinfo("Incorrect", f"No answer provided. Strike! Strikes left: {strikes_left}", parent=window)
-            else:
-                if answer.strip() == expected:
-                    messagebox.showinfo("Correct", "Correct! Moving to the next question.", parent=window)
-                    break
-                else:
-                    strikes_left -= 1
-                    messagebox.showinfo("Incorrect", f"Wrong answer. Strike! Strikes left: {strikes_left}", parent=window)
-
-            # if out of strikes, explode and stop asking
-            if strikes_left <= 0:
-                turn_off()
-                gui.after(100, gui.conclusion, False)
-                return
-
 # sets up the phase threads
 def setup_phases():
     global timer, keypad, wires, button, toggles
@@ -193,28 +149,18 @@ def strike():
 # turns off the bomb
 def turn_off():
     # stop all threads
-    try:
-        timer._running = False
-        keypad._running = False
-        wires._running = False
-        button._running = False
-        toggles._running = False
-    except Exception:
-        pass
+    timer._running = False
+    keypad._running = False
+    wires._running = False
+    button._running = False
+    toggles._running = False
 
-    # turn off the 7-segment display (only if available)
-    try:
-        component_7seg.blink_rate = 0
-        component_7seg.fill(0)
-    except Exception:
-        pass
-
-    # turn off the pushbutton's LED (only if available)
-    try:
-        for pin in button._rgb:
-            pin.value = True
-    except Exception:
-        pass
+    # turn off the 7-segment display
+    component_7seg.blink_rate = 0
+    component_7seg.fill(0)
+    # turn off the pushbutton's LED
+    for pin in button._rgb:
+        pin.value = True
 
 ######
 # MAIN
@@ -233,3 +179,4 @@ gui.after(100, bootup)
 
 # display the LCD GUI
 window.mainloop()
+
