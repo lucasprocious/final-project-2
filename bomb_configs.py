@@ -1,16 +1,19 @@
 #################################
 # CSC 102 Defuse the Bomb Project
 # Configuration file
-# Team: Lucas
+# Team: Lucas and Kobe
 #################################
 
 # constants
-DEBUG = False        # debug mode?
-RPi = False           # is this running on the RPi?
-SHOW_BUTTONS = False # show the Pause and Quit buttons on the main LCD GUI?
-COUNTDOWN = 300      # the initial bomb countdown value (seconds)
-NUM_STRIKES = 5      # the total strikes allowed before the bomb "explodes"
-NUM_PHASES = 4       # the total number of initial active bomb phases
+DEBUG = False         # debug mode?
+RPi = True            # is this running on the RPi?
+SHOW_BUTTONS = False  # show the Pause and Quit buttons on the main LCD GUI?
+COUNTDOWN = 300       # the initial bomb countdown value (seconds)
+NUM_STRIKES = 5       # the total strikes allowed before the bomb "explodes"
+NUM_PHASES = 4        # the total number of initial active bomb phases
+
+NUM_MATH_QUESTIONS = 2  # number of math questions before phases
+TRIVIA_PENALTY = 5      # seconds lost from the timer on a wrong trivia answer
 
 # imports
 from random import randint, shuffle, choice
@@ -24,6 +27,7 @@ if (RPi):
 #################################
 # setup the electronic components
 #################################
+
 # 7-segment display
 # 4 pins: 5V(+), GND(-), SDA, SCL
 #         ----------7SEG---------
@@ -87,40 +91,54 @@ if (RPi):
 # functions to generate targets for toggles/wires/keypad/Button
 ###########
 def genSerial():
-    # Create your own logic of making a serial number (if needed)
-    # TODO
+    # You can customize this later if needed
     return "B026DES"
 
 def genTogglesTarget():
     # Create your own logic of making a target number for toggles
-    # TODO
     return 20
 
 def genWiresTarget():
     # Create your own logic of making a target number for wires
-    # TODO
     return 5
+
 # generates the keypad combination from a keyword and rotation key
 def genKeypadTarget():
     # Create your own logic of making a keypad combination number if needed
-    # TODO
     return "26863"
+
+# generates math questions for the initial challenge
+def genMathQuestions():
+    """
+    Returns a fixed list of 2 questions:
+    1) Select the 3 smallest prime numbers -> answer '235'
+    2) 12 x 11 -> answer '132'
+    """
+    questions = [
+        {
+            'question': "Q1: Select the 3 smallest prime numbers.\nEnter them with no spaces (e.g., 235).",
+            'answer': "235"
+        },
+        {
+            'question': "Q2: What is 12 x 11?",
+            'answer': "132"
+        }
+    ]
+    return questions
 
 # generate the color of the pushbutton (which determines how to defuse the phase)
 button_color = choice(["R", "G", "B"])
 
 def genButtonTarget():
-    # TODO
     global button_color
-    # Create your own logic of making a Button target
     # appropriately set the target (R is None)
     b_target = None
     # G is the first numeric digit in the serial number
     if (button_color == "G"):
-        b_target = [ n for n in serial if n.isdigit() ][0]
+        b_target = [n for n in serial if n.isdigit()][0]
     # B is the last numeric digit in the serial number
     elif (button_color == "B"):
-        b_target = [ n for n in serial if n.isdigit() ][-1]
+        b_target = [n for n in serial if n.isdigit()][-1]
 
     return b_target
 
@@ -131,7 +149,16 @@ wires_target = genWiresTarget()
 keypad_target = genKeypadTarget()
 button_target = genButtonTarget()
 
+# list of math questions for the trivia phase
+math_questions = genMathQuestions()
+
+# aliases so the main file can import them easily
+trivia_questions = math_questions                 # full list (for multi-question flow)
+trivia_question = math_questions[0]['question']   # first question (for compatibility)
+
 # set the bomb's LCD bootup text
-boot_text = f"*Add your own text here specific to your bomb*\n"\
-            f"*Serial number: {serial}\n"\
-            
+boot_text = (
+    "*SECURITY PROTOCOL ACTIVATED*\n"
+    "*Mathematical verification required*\n"
+    f"*Serial number: {serial}\n"
+)
