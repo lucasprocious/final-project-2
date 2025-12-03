@@ -1,34 +1,123 @@
 #################################
 # CSC 102 Defuse the Bomb Project
 # Main program
-# Team: 
+# Team: Lucas and Kobe
 #################################
 
 # import the configs
 from bomb_configs import *
-# import the phases
+# import the phases (GUI classes, phase threads)
 from bomb_phases import *
 
+from time import sleep
+
 ###########
-# functions
+# helper functions
 ###########
+
 # generates the bootup sequence on the LCD
 def bootup(n=0):
     gui._lscroll["text"] = boot_text.replace("\x00", "")
-    # configure the remaining GUI widgets
+
+def display_on_lcd(text):
+    """
+    Show text on the scrolling LCD area.
+    Right now we just use the boot/scroll label.
+    """
+    gui._lscroll["text"] = text
+
+def get_keypad_input():
+    """
+    Read a string from the physical keypad on the RPi.
+    - Digits 0–9 are appended to the current input.
+    - '#' = submit/enter.
+    - '*' = clear current input.
+    """
+    if RPi:
+        value = ""
+        display_on_lcd(value)
+        while True:
+            if component_keypad.pressed_keys:
+                key = str(component_keypad.pressed_keys[0])
+
+                # debounce
+                while component_keypad.pressed_keys:
+                    sleep(0.1)
+
+                if key == "#":
+                    # submit answer
+                    return value
+                elif key == "*":
+                    # clear input
+                    value = ""
+                    display_on_lcd(value)
+                else:
+                    # append digit and show it
+                    value += key
+                    display_on_lcd(value)
+            sleep(0.1)
+    else:
+        # fallback for testing on a non-RPi machine
+        return input("Enter answer: ")
+
+###########
+# trivia / math question phase
+###########
+
+# total seconds removed from the bomb timer due to wrong answers
+time_penalty = 0
+
+def start_bomb_sequence():
+    """
+    Ask each math trivia question in order.
+    - User must answer correctly to move on.
+    - Wrong answer: subtract TRIVIA_PENALTY seconds from the bomb timer.
+    After all questions are correct, start the regular bomb phases.
+    """
+    global time_penalty
+
+    for q in trivia_questions:
+        # show the current question
+        display_on_lcd(q["question"])
+
+        while True:
+            user_input = get_keypad_input()
+            if user_input is None:
+                user_input = ""
+            user_input = user_input.strip()
+
+            if user_input == q["answer"]:
+                # correct
+                display_on_lcd("Correct!")
+                sleep(1)
+                break  # move to next question
+            else:
+                # incorrect -> penalty
+                time_penalty += TRIVIA_PENALTY
+                display_on_lcd(f"Incorrect! -{TRIVIA_PENALTY}s")
+                sleep(1)
+                # re-show the question
+                display_on_lcd(q["question"])
+
+    # all questions done correctly -> start the bomb
     gui.setup()
-    # setup the phase threads, execute them, and check their statuses
     if (RPi):
         setup_phases()
         check_phases()
-    # if we're animating
-   
+
+###########
+# phase/thread setup and checking (unchanged logic)
+###########
+
 # sets up the phase threads
 def setup_phases():
-    global timer, keypad, wires, button, toggles
-    
+    global timer, keypad, wires, button, toggles, time_penalty
+
+    # apply trivia time penalty
+    start_value = max(0, COUNTDOWN - time_penalty)
+
     # setup the timer thread
-    timer = Timer(component_7seg, COUNTDOWN)
+    timer = Timer(component_7seg, start_value)
     # bind the 7-segment display to the LCD GUI so that it can be paused/unpaused from the GUI
     gui.setTimer(timer)
     # setup the keypad thread
@@ -52,7 +141,7 @@ def setup_phases():
 # checks the phase threads
 def check_phases():
     global active_phases
-    
+
     # check the timer
     if (timer._running):
         # update the GUI
@@ -64,6 +153,7 @@ def check_phases():
         gui.after(100, gui.conclusion, False)
         # don't check any more phases
         return
+
     # check the keypad
     if (keypad._running):
         # update the GUI
@@ -78,6 +168,7 @@ def check_phases():
             # reset the keypad
             keypad._failed = False
             keypad._value = ""
+
     # check the wires
     if (wires._running):
         # update the GUI
@@ -91,6 +182,7 @@ def check_phases():
             strike()
             # reset the wires
             wires._failed = False
+
     # check the button
     if (button._running):
         # update the GUI
@@ -104,6 +196,7 @@ def check_phases():
             strike()
             # reset the button
             button._failed = False
+
     # check the toggles
     if (toggles._running):
         # update the GUI
@@ -142,7 +235,6 @@ def check_phases():
 # handles a strike
 def strike():
     global strikes_left
-    
     # note the strike
     strikes_left -= 1
 
@@ -162,7 +254,7 @@ def turn_off():
     for pin in button._rgb:
         pin.value = True
 
-######
+###### 
 # MAIN
 ######
 
@@ -174,9 +266,14 @@ gui = Lcd(window)
 strikes_left = NUM_STRIKES
 active_phases = NUM_PHASES
 
-# "boot" the bomb
-gui.after(100, bootup)
+def boot_and_start():
+    # show boot text
+    bootup()
+    # after 2 seconds, start the trivia sequence
+    gui.after(2000, start_bomb_sequence)
+
+# "boot" the bomb then start trivia
+gui.after(100, boot_and_start)
 
 # display the LCD GUI
 window.mainloop()
-
