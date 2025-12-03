@@ -1,12 +1,12 @@
 #################################
 # CSC 102 Defuse the Bomb Project
 # Main program
-# Team: Lucas and Kobe
+# Team: 
 #################################
 
 # import the configs
 from bomb_configs import *
-# import the phases (GUI classes, phase threads)
+# import the phases
 from bomb_phases import *
 
 from time import sleep
@@ -14,10 +14,12 @@ from time import sleep
 ###########
 # helper functions
 ###########
-
 # generates the bootup sequence on the LCD
 def bootup(n=0):
+    # show the boot text
     gui._lscroll["text"] = boot_text.replace("\x00", "")
+    # after 2 seconds, start the trivia sequence
+    gui.after(2000, start_bomb_sequence)
 
 def display_on_lcd(text):
     """
@@ -106,14 +108,14 @@ def start_bomb_sequence():
         check_phases()
 
 ###########
-# phase/thread setup and checking (unchanged logic)
+# phase/thread setup and checking (your original logic, slightly tweaked)
 ###########
 
 # sets up the phase threads
 def setup_phases():
     global timer, keypad, wires, button, toggles, time_penalty
-
-    # apply trivia time penalty
+    
+    # apply trivia time penalty to the starting timer value
     start_value = max(0, COUNTDOWN - time_penalty)
 
     # setup the timer thread
@@ -141,7 +143,7 @@ def setup_phases():
 # checks the phase threads
 def check_phases():
     global active_phases
-
+    
     # check the timer
     if (timer._running):
         # update the GUI
@@ -153,7 +155,6 @@ def check_phases():
         gui.after(100, gui.conclusion, False)
         # don't check any more phases
         return
-
     # check the keypad
     if (keypad._running):
         # update the GUI
@@ -168,7 +169,6 @@ def check_phases():
             # reset the keypad
             keypad._failed = False
             keypad._value = ""
-
     # check the wires
     if (wires._running):
         # update the GUI
@@ -182,7 +182,6 @@ def check_phases():
             strike()
             # reset the wires
             wires._failed = False
-
     # check the button
     if (button._running):
         # update the GUI
@@ -196,7 +195,6 @@ def check_phases():
             strike()
             # reset the button
             button._failed = False
-
     # check the toggles
     if (toggles._running):
         # update the GUI
@@ -235,6 +233,7 @@ def check_phases():
 # handles a strike
 def strike():
     global strikes_left
+    
     # note the strike
     strikes_left -= 1
 
@@ -266,14 +265,8 @@ gui = Lcd(window)
 strikes_left = NUM_STRIKES
 active_phases = NUM_PHASES
 
-def boot_and_start():
-    # show boot text
-    bootup()
-    # after 2 seconds, start the trivia sequence
-    gui.after(2000, start_bomb_sequence)
-
-# "boot" the bomb then start trivia
-gui.after(100, boot_and_start)
+# "boot" the bomb (bootup will call start_bomb_sequence afterwards)
+gui.after(100, bootup)
 
 # display the LCD GUI
 window.mainloop()
