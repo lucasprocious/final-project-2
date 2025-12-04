@@ -257,7 +257,9 @@ class Wires(PhaseThread):
         if self._defused:
             return "DEFUSED"
         else:
-            return "ACTIVE"
+            # show pattern like 10101
+            bits = "".join("1" if pin.value else "0" for pin in self._component)
+            return bits
 
 
 # the pushbutton phase
