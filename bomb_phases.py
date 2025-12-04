@@ -233,23 +233,21 @@ class Wires(PhaseThread):
     def run(self):
         self._running = True
         while self._running:
-
             # read wire states (True = cut, False = not cut)
             wire_states = [pin.value for pin in self._component]
 
-            # convert to binary string (example: 0 0 1 0 1 -> "00101")
+            # convert to binary string
             bits = "".join("1" if state else "0" for state in wire_states)
 
-            # convert to int
+            # convert to int (decimal value)
             current_value = int(bits, 2)
 
             # check if it matches the target
             if current_value == self._target:
-                self._defused = True
-                self._running = False
+                self._defused = True    # ✅ defuse the phase
+                self._running = False   # stop the thread
             else:
-                # not matching yet → keep waiting
-                pass
+                self._defused = False   # optional: mark as not defused if pattern is broken
 
             sleep(0.1)
 
@@ -257,9 +255,10 @@ class Wires(PhaseThread):
         if self._defused:
             return "DEFUSED"
         else:
-            # show pattern like 10101
+            # show current wire pattern in binary
             bits = "".join("1" if pin.value else "0" for pin in self._component)
             return bits
+
 
 
 # the pushbutton phase
