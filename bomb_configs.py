@@ -99,7 +99,7 @@ def genTogglesTarget():
     return 20
 
 def genWiresTarget():
-    return 3  # decimal representation of 00011
+    return 3  # decimal representation of 00100
 
 
 # generates the keypad combination from a keyword and rotation key
