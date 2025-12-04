@@ -227,9 +227,6 @@ class Keypad(PhaseThread):
 
 # the jumper wires phase
 class Wires(PhaseThread):
-    def __init__(self, component, target, name="Wires"):
-        super().__init__(name, component, target)
-
     def run(self):
         self._running = True
         while self._running:
@@ -239,15 +236,13 @@ class Wires(PhaseThread):
             # convert to binary string
             bits = "".join("1" if state else "0" for state in wire_states)
 
-            # convert to int (decimal value)
+            # convert to decimal
             current_value = int(bits, 2)
 
             # check if it matches the target
             if current_value == self._target:
-                self._defused = True    # ✅ defuse the phase
-                self._running = False   # stop the thread
-            else:
-                self._defused = False   # optional: mark as not defused if pattern is broken
+                self._defused = True
+                self._running = False  # stop the thread
 
             sleep(0.1)
 
@@ -255,9 +250,9 @@ class Wires(PhaseThread):
         if self._defused:
             return "DEFUSED"
         else:
-            # show current wire pattern in binary
             bits = "".join("1" if pin.value else "0" for pin in self._component)
             return bits
+
 
 
 
