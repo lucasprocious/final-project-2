@@ -55,11 +55,11 @@ if (RPi):
 # the jumper wire pins
 if (RPi):
     # the pins
-    component_wires = [DigitalInOut(i) for i in (board.D14, board.D15, board.D18, board.D23, board.D24)]
-    for pin in component_wires:
-        # pins are input and pulled down
-        pin.direction = Direction.INPUT
-        pin.pull = Pull.DOWN
+  component_wires = [DigitalInOut(i) for i in (board.D14, board.D15, board.D18, board.D23, board.D24)]
+for pin in component_wires:
+    pin.direction = Direction.INPUT
+    pin.pull = Pull.DOWN
+
 
 # pushbutton
 # 6 pins: 4, 17, 27, 22, 3V3, 3V3
