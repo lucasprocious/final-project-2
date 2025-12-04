@@ -233,19 +233,23 @@ class Wires(PhaseThread):
     def run(self):
         self._running = True
         while self._running:
-            # read wire states (True = cut, False = not cut)
+            # read wire states (True = cut, False = connected)
             wire_states = [pin.value for pin in self._component]
 
             # convert to binary string
             bits = "".join("1" if state else "0" for state in wire_states)
 
-            # convert binary string to decimal
-            current_value = int(bits, 2)
+            # if your wires are read MSB → LSB but your target assumes LSB → MSB, reverse:
+            current_value = int(bits[::-1], 2)
+
+            # DEBUG: see what is being read
+            print(f"Wire states: {wire_states} | Bits: {bits} | Reversed Decimal: {current_value} | Target: {self._target}")
 
             # check if it matches the target
             if current_value == self._target:
                 self._defused = True
-                print("Wires DEFUSED!")  # DEBUG: shows in terminal
+                print("Wires DEFUSED!")  # DEBUG
+                # do NOT stop _running here; the main loop will handle stopping
             else:
                 self._defused = False
 
@@ -258,6 +262,7 @@ class Wires(PhaseThread):
             # show current wire pattern in binary
             bits = "".join("1" if pin.value else "0" for pin in self._component)
             return bits
+
 
 
 
