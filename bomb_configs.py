@@ -99,8 +99,8 @@ def genTogglesTarget():
     return 20
 
 def genWiresTarget():
-    # Create your own logic of making a target number for wires
-    return 5
+    return 21  # decimal representation of 10101
+
 
 # generates the keypad combination from a keyword and rotation key
 def genKeypadTarget():
