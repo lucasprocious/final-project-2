@@ -230,18 +230,35 @@ class Wires(PhaseThread):
     def __init__(self, component, target, name="Wires"):
         super().__init__(name, component, target)
 
-    # runs the thread
     def run(self):
-        # TODO
-        pass
+        self._running = True
+        while self._running:
 
-    # returns the jumper wires state as a string
+            # read wire states (True = cut, False = not cut)
+            wire_states = [pin.value for pin in self._component]
+
+            # convert to binary string (example: 0 0 1 0 1 -> "00101")
+            bits = "".join("1" if state else "0" for state in wire_states)
+
+            # convert to int
+            current_value = int(bits, 2)
+
+            # check if it matches the target
+            if current_value == self._target:
+                self._defused = True
+                self._running = False
+            else:
+                # not matching yet → keep waiting
+                pass
+
+            sleep(0.1)
+
     def __str__(self):
-        if (self._defused):
+        if self._defused:
             return "DEFUSED"
         else:
-            # TODO
-            pass
+            return "ACTIVE"
+
 
 # the pushbutton phase
 class Button(PhaseThread):
