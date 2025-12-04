@@ -230,26 +230,21 @@ class Wires(PhaseThread):
     def __init__(self, component, target, name="Wires"):
         super().__init__(name, component, target)
 
-    def run(self):
-        self._running = True
-        while self._running:
-            # read wire states (True = cut, False = not cut)
-            wire_states = [pin.value for pin in self._component]
+def run(self):
+    self._running = True
+    while self._running:
+        wire_states = [pin.value for pin in self._component]
+        bits = "".join("1" if state else "0" for state in wire_states)
+        current_value = int(bits, 2)
 
-            # convert to binary string
-            bits = "".join("1" if state else "0" for state in wire_states)
+        if current_value == self._target:
+            self._defused = True
+            # DO NOT stop _running here
+        else:
+            self._defused = False
 
-            # convert to int (decimal value)
-            current_value = int(bits, 2)
+        sleep(0.1)
 
-            # check if it matches the target
-            if current_value == self._target:
-                self._defused = True    # ✅ defuse the phase
-                self._running = False   # stop the thread
-            else:
-                self._defused = False   # optional: mark as not defused if pattern is broken
-
-            sleep(0.1)
 
     def __str__(self):
         if self._defused:
