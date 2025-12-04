@@ -105,7 +105,7 @@ def genWiresTarget():
 # generates the keypad combination from a keyword and rotation key
 def genKeypadTarget():
     # Create your own logic of making a keypad combination number if needed
-    return "26863"
+    return "235"
 
 # generates math questions for the initial challenge
 def genMathQuestions():
