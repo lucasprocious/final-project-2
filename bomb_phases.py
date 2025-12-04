@@ -21,153 +21,53 @@ import sys
 class Lcd(Frame):
     def __init__(self, window):
         super().__init__(window, bg="black")
+        # make the GUI fullscreen
         window.attributes("-fullscreen", True)
-
-        self._timer = None     # (will be set later)
-        self._button = None    # (will be set later)
-
+        # we need to know about the timer (7-segment display) to be able to pause/unpause it
+        self._timer = None
+        # we need to know about the pushbutton to turn off its LED when the program exits
+        self._button = None
+        # setup the initial "boot" GUI
         self.setupBoot()
 
-    # ----------------------------------------------------
-    # BOOT SCREEN: Shows boot text + first trivia question
-    # ----------------------------------------------------
+    # sets up the LCD "boot" GUI
     def setupBoot(self):
-        from bomb_configs import boot_text, trivia_questions
-
-        # Layout spacing
+        # set column weights
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=2)
         self.columnconfigure(2, weight=1)
-
-        # Show scrolling boot text
-        self._lscroll = Label(
-            self, bg="black", fg="white",
-            font=("Courier New", 14),
-            text=boot_text,
-            justify=LEFT
-        )
+        # the scrolling informative "boot" text
+        self._lscroll = Label(self, bg="black", fg="white", font=("Courier New", 14), text="", justify=LEFT)
         self._lscroll.grid(row=0, column=0, columnspan=3, sticky=W)
-
-        # Trivia Question
-        self._lquestion = Label(
-            self, bg="black", fg="cyan",
-            font=("Courier New", 18),
-            text=trivia_questions[0]['question']
-        )
-        self._lquestion.grid(row=1, column=0, columnspan=3, pady=20)
-
-        # User input box
-        self._answer_entry = Entry(self, font=("Courier New", 18))
-        self._answer_entry.grid(row=2, column=0, columnspan=3)
-
-        # Submit button
-        self._submit_button = Button(
-            self, text="Submit",
-            bg="red", fg="white",
-            font=("Courier New", 18),
-            command=self.checkTriviaAnswer
-        )
-        self._submit_button.grid(row=3, column=1, pady=20)
-
-        # Tracks question index (you have 2 trivia questions)
-        self.current_question_index = 0
-
         self.pack(fill=BOTH, expand=True)
 
-    # ----------------------------------------------------
-    # CHECK TRIVIA ANSWER: Runs when user clicks "Submit"
-    # ----------------------------------------------------
-    def checkTriviaAnswer(self):
-        from bomb_configs import trivia_questions, TRIVIA_PENALTY
-        global timer
-
-        user = self._answer_entry.get()
-        correct = trivia_questions[self.current_question_index]['answer']
-
-        # Correct answer
-        if user == correct:
-            self.current_question_index += 1
-
-            # More questions?
-            if self.current_question_index < len(trivia_questions):
-                self._lquestion['text'] = trivia_questions[self.current_question_index]['question']
-                self._answer_entry.delete(0, END)
-            else:
-                self.startBomb()   # ALL QUESTIONS DONE → start bomb
-
-        # Wrong answer
-        else:
-            self._lquestion['text'] = f"Incorrect! Try again."
-            self._answer_entry.delete(0, END)
-
-    # ----------------------------------------------------
-    # START THE ACTUAL BOMB (timer, phases, GUI)
-    # ----------------------------------------------------
-    def startBomb(self):
-        # Remove boot UI widgets
-        self._lscroll.destroy()
-        self._lquestion.destroy()
-        self._answer_entry.destroy()
-        self._submit_button.destroy()
-
-        # Load main bomb GUI
-        self.setup()
-
-        # Start real bomb phases
-        from bomb_configs import RPi
-        if RPi:
-            setup_phases()
-            check_phases()
-
-    # ----------------------------------------------------
-    # MAIN BOMB GUI (unchanged)
-    # ----------------------------------------------------
+    # sets up the LCD GUI
     def setup(self):
-        self._ltimer = Label(self, bg="black", fg="#00ff00",
-                             font=("Courier New", 18),
-                             text="Time left: ")
+        # the timer
+        self._ltimer = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Time left: ")
         self._ltimer.grid(row=1, column=0, columnspan=3, sticky=W)
-
-        self._lkeypad = Label(self, bg="black", fg="#00ff00",
-                              font=("Courier New", 18),
-                              text="Keypad phase: ")
+        # the keypad passphrase
+        self._lkeypad = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Keypad phase: ")
         self._lkeypad.grid(row=2, column=0, columnspan=3, sticky=W)
-
-        self._lwires = Label(self, bg="black", fg="#00ff00",
-                             font=("Courier New", 18),
-                             text="Wires phase: ")
+        # the jumper wires status
+        self._lwires = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Wires phase: ")
         self._lwires.grid(row=3, column=0, columnspan=3, sticky=W)
-
-        self._lbutton = Label(self, bg="black", fg="#00ff00",
-                              font=("Courier New", 18),
-                              text="Button phase: ")
+        # the pushbutton status
+        self._lbutton = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Button phase: ")
         self._lbutton.grid(row=4, column=0, columnspan=3, sticky=W)
-
-        self._ltoggles = Label(self, bg="black", fg="#00ff00",
-                               font=("Courier New", 18),
-                               text="Toggles phase: ")
+        # the toggle switches status
+        self._ltoggles = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Toggles phase: ")
         self._ltoggles.grid(row=5, column=0, columnspan=2, sticky=W)
-
-        self._lstrikes = Label(self, bg="black", fg="#00ff00",
-                               font=("Courier New", 18),
-                               text="Strikes left: ")
+        # the strikes left
+        self._lstrikes = Label(self, bg="black", fg="#00ff00", font=("Courier New", 18), text="Strikes left: ")
         self._lstrikes.grid(row=5, column=2, sticky=W)
-
         if (SHOW_BUTTONS):
-            self._bpause = tkinter.Button(self, bg="red", fg="white",
-                                          font=("Courier New", 18),
-                                          text="Pause",
-                                          anchor=CENTER,
-                                          command=self.pause)
+            # the pause button (pauses the timer)
+            self._bpause = tkinter.Button(self, bg="red", fg="white", font=("Courier New", 18), text="Pause", anchor=CENTER, command=self.pause)
             self._bpause.grid(row=6, column=0, pady=40)
-
-            self._bquit = tkinter.Button(self, bg="red", fg="white",
-                                         font=("Courier New", 18),
-                                         text="Quit",
-                                         anchor=CENTER,
-                                         command=self.quit)
+            # the quit button
+            self._bquit = tkinter.Button(self, bg="red", fg="white", font=("Courier New", 18), text="Quit", anchor=CENTER, command=self.quit)
             self._bquit.grid(row=6, column=2, pady=40)
-
 
     # lets us pause/unpause the timer (7-segment display)
     def setTimer(self, timer):
