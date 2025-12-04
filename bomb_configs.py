@@ -158,7 +158,7 @@ trivia_question = math_questions[0]['question']   # first question (for compatib
 
 # set the bomb's LCD bootup text
 boot_text = (
-    "*SECURITY PROTOCOL ACTIVATED*\n"
-    "*Mathematical verification required*\n"
-    f"*Serial number: {serial}\n"
+    "Welcome to the Mathmatical Meltdown!\n"
+    "You have 5 minutes to defuse this bomb! Good Luck!\n"
+    f"First Question: What is the smallest prime numbers?"
 )
