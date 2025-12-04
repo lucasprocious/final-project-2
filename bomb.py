@@ -180,3 +180,6 @@ gui.after(100, bootup)
 # display the LCD GUI
 window.mainloop()
 
+
+
+
