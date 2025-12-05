@@ -16,44 +16,47 @@ from time import sleep  # make sure this is at the top with your imports
 
 def show_next_boot_line():
     """
-    Shows each line of boot_text one at a time in different colors.
-    When done, it sets up the main bomb GUI and starts phases.
+    Shows each line of boot_text one at a time in different colors,
+    and keeps all previous lines on screen.
     """
-    # Get current index (default to 0 if attribute doesn't exist yet)
     index = getattr(gui, "_boot_index", 0)
 
-    # Split the boot text into lines
+    # split into individual lines
     lines = boot_text.replace("\x00", "").splitlines()
 
-    # Define per-line colors (will cycle if there are more lines than colors)
+    # colors for each line
     colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # neon green = #39FF14
 
     if index < len(lines):
         line = lines[index]
         color = colors[index % len(colors)]
 
-        gui._lscroll.config(text=line, fg=color)
+        # Create a NEW label for each line so they stay on screen
+        lbl = Label(gui, text=line, bg="black", fg=color,
+                    font=("Courier New", 16), justify=LEFT)
+        lbl.grid(row=index, column=0, columnspan=3, sticky=W, pady=2)
 
-        # store next index
+        # track labels if you need them later
+        if not hasattr(gui, "boot_labels"):
+            gui.boot_labels = []
+        gui.boot_labels.append(lbl)
+
         gui._boot_index = index + 1
 
-        # schedule the next line after 1.5 seconds
-        gui.after(1500, show_next_boot_line)
-    else:
-        # Boot animation done → clear or reset color/text if you want
-        gui._lscroll.config(fg="white")
-        gui._lscroll["text"] = ""
+        # show next line in 1.2 seconds
+        gui.after(1200, show_next_boot_line)
 
-        # Now continue like your original bootup did
+    else:
+        # All lines are displayed → now load the bomb GUI
         gui.setup()
+
         if RPi:
             setup_phases()
             check_phases()
 
+
 def bootup(n=0):
-    # start at the first line
-    gui._boot_index = 0
-    # kick off the animated boot sequence
+    gui._boot_index = 0  # start animation at line 0
     show_next_boot_line()
 
     # if we're animating
