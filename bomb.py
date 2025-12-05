@@ -18,33 +18,37 @@ def show_next_boot_line():
     index = getattr(gui, "_boot_index", 0)
 
     lines = boot_text.replace("\x00", "").splitlines()
-    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]
+    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # etc
 
     if index < len(lines):
         line = lines[index]
         color = colors[index % len(colors)]
 
+        # each boot line as its own label in boot_frame
         lbl = Label(gui.boot_frame, text=line, bg="black", fg=color,
                     font=("Courier New", 16), justify=LEFT)
-        lbl.pack(anchor="w")  # vertical stack
+        lbl.pack(anchor="w")
 
+        if not hasattr(gui, "boot_labels"):
+            gui.boot_labels = []
         gui.boot_labels.append(lbl)
+
         gui._boot_index = index + 1
 
         gui.after(1200, show_next_boot_line)
-
     else:
-        # Finished the animation → now show bomb elements in bomb_frame
+       
+        # after the last boot line, set up the bomb HUD
         gui.setup()
         if RPi:
             setup_phases()
             check_phases()
 
 
-
 def bootup(n=0):
-    gui._boot_index = 0  # start animation at line 0
+    gui._boot_index = 0
     show_next_boot_line()
+
 
     # if we're animating
    
