@@ -15,44 +15,31 @@ from bomb_phases import *
 from time import sleep  # make sure this is at the top with your imports
 
 def show_next_boot_line():
-    """
-    Shows each line of boot_text one at a time in different colors,
-    and keeps all previous lines on screen.
-    """
     index = getattr(gui, "_boot_index", 0)
 
-    # split into individual lines
     lines = boot_text.replace("\x00", "").splitlines()
-
-    # colors for each line
-    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # neon green = #39FF14
+    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]
 
     if index < len(lines):
         line = lines[index]
         color = colors[index % len(colors)]
 
-        # Create a NEW label for each line so they stay on screen
-        lbl = Label(gui, text=line, bg="black", fg=color,
+        lbl = Label(gui.boot_frame, text=line, bg="black", fg=color,
                     font=("Courier New", 16), justify=LEFT)
-        lbl.grid(row=index, column=0, columnspan=3, sticky=W, pady=2)
+        lbl.pack(anchor="w")  # vertical stack
 
-        # track labels if you need them later
-        if not hasattr(gui, "boot_labels"):
-            gui.boot_labels = []
         gui.boot_labels.append(lbl)
-
         gui._boot_index = index + 1
 
-        # show next line in 1.2 seconds
         gui.after(1200, show_next_boot_line)
 
     else:
-        # All lines are displayed → now load the bomb GUI
+        # Finished the animation → now show bomb elements in bomb_frame
         gui.setup()
-
         if RPi:
             setup_phases()
             check_phases()
+
 
 
 def bootup(n=0):
