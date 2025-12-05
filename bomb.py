@@ -12,15 +12,50 @@ from bomb_phases import *
 ###########
 # functions
 ###########
-# generates the bootup sequence on the LCD
+from time import sleep  # make sure this is at the top with your imports
+
+def show_next_boot_line():
+    """
+    Shows each line of boot_text one at a time in different colors.
+    When done, it sets up the main bomb GUI and starts phases.
+    """
+    # Get current index (default to 0 if attribute doesn't exist yet)
+    index = getattr(gui, "_boot_index", 0)
+
+    # Split the boot text into lines
+    lines = boot_text.replace("\x00", "").splitlines()
+
+    # Define per-line colors (will cycle if there are more lines than colors)
+    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # neon green = #39FF14
+
+    if index < len(lines):
+        line = lines[index]
+        color = colors[index % len(colors)]
+
+        gui._lscroll.config(text=line, fg=color)
+
+        # store next index
+        gui._boot_index = index + 1
+
+        # schedule the next line after 1.5 seconds
+        gui.after(1500, show_next_boot_line)
+    else:
+        # Boot animation done → clear or reset color/text if you want
+        gui._lscroll.config(fg="white")
+        gui._lscroll["text"] = ""
+
+        # Now continue like your original bootup did
+        gui.setup()
+        if RPi:
+            setup_phases()
+            check_phases()
+
 def bootup(n=0):
-    gui._lscroll["text"] = boot_text.replace("\x00", "")
-    # configure the remaining GUI widgets
-    gui.setup()
-    # setup the phase threads, execute them, and check their statuses
-    if (RPi):
-        setup_phases()
-        check_phases()
+    # start at the first line
+    gui._boot_index = 0
+    # kick off the animated boot sequence
+    show_next_boot_line()
+
     # if we're animating
    
 # sets up the phase threads
