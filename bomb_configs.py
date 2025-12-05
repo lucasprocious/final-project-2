@@ -95,16 +95,16 @@ def genSerial():
     return "B026DES"
 
 def genTogglesTarget():
-    # Create your own logic of making a target number for toggles
+    # Represent 1100
     return 12
 
 def genWiresTarget():
-    return 4  # decimal representation of 10101
+    return 4  # decimal representation of 00100
 
 
 # generates the keypad combination from a keyword and rotation key
 def genKeypadTarget():
-    # Create your own logic of making a keypad combination number if needed
+    # Represent smallest prime nums
     return "235"
 
 # generates math questions for the initial challenge
