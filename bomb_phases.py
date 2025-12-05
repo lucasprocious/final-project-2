@@ -323,34 +323,31 @@ class Toggles(PhaseThread):
     def __init__(self, component, target, name="Toggles"):
         super().__init__(name, component, target)
 
-    # runs the thread
     def run(self):
         self._running = True
         while self._running:
 
-            # Read toggle states (True = ON, False = OFF)
+            # Read toggle states
             toggle_states = [pin.value for pin in self._component]
 
-            # Convert booleans to binary string
+            # Convert to binary string
             bits = "".join("1" if state else "0" for state in toggle_states)
 
             # Convert binary to integer
             current_value = int(bits, 2)
 
-            # Compare with the target
+            # Check if correct
             if current_value == self._target:
-                self._defused = True
-                self._running = False   # stop toggle thread
+                self._defused = True      # mark defused
+                # DO NOT STOP THREAD HERE
             else:
                 self._defused = False
 
             sleep(0.1)
 
-    # returns the toggle switches state as a string
     def __str__(self):
         if self._defused:
             return "DEFUSED"
         else:
             bits = "".join("1" if pin.value else "0" for pin in self._component)
             return bits
-
