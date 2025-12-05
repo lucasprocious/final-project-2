@@ -161,5 +161,6 @@ boot_text = (
     f"Welcome to the Mathmatical Meltdown!\n"
     f"You have 5 minutes to defuse this bomb! Good Luck!\n"
     f"First Question: What is the smallest prime numbers?\n(In order smallest to largest)\n"
-    f"Second Question:What is the number 3 in binary?(wires).\n"
+    f"Second Question:What is the number 4 in binary?(wires).\n"
+    f"Third Question: What is 3!×4 divided by 2. In Binary?(Toggles)\n"
 )
