@@ -56,7 +56,7 @@ if (RPi):
 if (RPi):
     # the pins
   component_wires = [DigitalInOut(i) for i in (board.D14, board.D15, board.D18, board.D23, board.D24)]
-for pin in component_wires:
+    for pin in component_wires:
     pin.direction = Direction.INPUT
     pin.pull = Pull.DOWN
 
