@@ -99,7 +99,7 @@ def genTogglesTarget():
     return 20
 
 def genWiresTarget():
-    return 4  # decimal representation of 00100
+    return 4  # decimal representation of 10101
 
 
 # generates the keypad combination from a keyword and rotation key
@@ -158,7 +158,8 @@ trivia_question = math_questions[0]['question']   # first question (for compatib
 
 # set the bomb's LCD bootup text
 boot_text = (
-    "Welcome to the Mathmatical Meltdown!\n"
-    "You have 5 minutes to defuse this bomb! Good Luck!\n"
-    f"First Question: What is the smallest prime numbers?"
+    f"Welcome to the Mathmatical Meltdown!\n"
+    f"You have 5 minutes to defuse this bomb! Good Luck!\n"
+    f"First Question: What is the smallest prime numbers?\n(In order smallest to largest)\n"
+    f"Second Question:What is the number 3 in binary?(wires).\n"
 )
