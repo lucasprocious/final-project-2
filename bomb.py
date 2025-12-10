@@ -92,16 +92,17 @@ def check_phases():
     global active_phases
     
     # check the timer
-    if (timer._running):
-        # update the GUI
+     if (timer._running):
         gui._ltimer["text"] = f"Time left: {timer}"
     else:
         # the countdown has expired -> explode!
-        # turn off the bomb and render the conclusion GUI
+        pygame.mixer.music.stop()      # stop background music
+        explosion_snd.play()           # play explosion sound
+
         turn_off()
         gui.after(100, gui.conclusion, False)
-        # don't check any more phases
         return
+
     # check the keypad
     if (keypad._running):
         # update the GUI
@@ -159,20 +160,24 @@ def check_phases():
     # note the strikes on the GUI
     gui._lstrikes["text"] = f"Strikes left: {strikes_left}"
     # too many strikes -> explode!
-    if (strikes_left == 0):
-        # turn off the bomb and render the conclusion GUI
+        if (strikes_left == 0):
+        pygame.mixer.music.stop()
+        explosion_snd.play()
+
         turn_off()
         gui.after(1000, gui.conclusion, False)
-        # stop checking phases
         return
 
+
     # the bomb has been successfully defused!
-    if (active_phases == 0):
-        # turn off the bomb and render the conclusion GUI
+       if (active_phases == 0):
+        # bomb defused successfully: stop music, no explosion
+        pygame.mixer.music.stop()
+
         turn_off()
         gui.after(100, gui.conclusion, True)
-        # stop checking phases
         return
+
 
     # check the phases again after a slight delay
     gui.after(100, check_phases)
