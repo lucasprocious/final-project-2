@@ -15,8 +15,8 @@ from time import sleep
 pygame.mixer.init()
 
 # Load background music and explosion sound
-pygame.mixer.music.load("Bomb.mp3")          # background loop
-explosion_snd = pygame.mixer.Sound("Explosion.mp3")  #  boom
+pygame.mixer.music.load("Bomb.mp3")  # background loop
+explosion_snd = pygame.mixer.Sound("Explosion.mp3")  # boom
 
 ###########
 # functions
