@@ -1,24 +1,33 @@
 #################################
 # CSC 102 Defuse the Bomb Project
 # Main program
-# Team: 
+# Team: Lucas and Kobe
 #################################
 
 # import the configs
 from bomb_configs import *
 # import the phases
 from bomb_phases import *
+import pygame
+from time import sleep  
+
+# --- Audio setup ---
+pygame.mixer.init()
+
+# Load background music and explosion sound
+pygame.mixer.music.load("Bomb.mp3")          # background loop
+explosion_snd = pygame.mixer.Sound("Explosion.mp3")  #  boom
 
 ###########
 # functions
 ###########
-from time import sleep  # make sure this is at the top with your imports
+ 
 
 def show_next_boot_line():
     index = getattr(gui, "_boot_index", 0)
 
     lines = boot_text.replace("\x00", "").splitlines()
-    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # etc
+    colors = ["red", "cyan", "yellow", "#39FF14", "orange"]  # Colors
 
     if index < len(lines):
         line = lines[index]
@@ -195,19 +204,23 @@ def turn_off():
 # MAIN
 ######
 
-# initialize the LCD GUI
+# initialize the LCD
 window = Tk()
 gui = Lcd(window)
 
-# initialize the bomb strikes and active phases (i.e., not yet defused)
+# initialize the bomb strikes and active phases 
 strikes_left = NUM_STRIKES
 active_phases = NUM_PHASES
+
+# start background music (loop forever)
+pygame.mixer.music.play(-1)
 
 # "boot" the bomb
 gui.after(100, bootup)
 
 # display the LCD GUI
 window.mainloop()
+
 
 
 
